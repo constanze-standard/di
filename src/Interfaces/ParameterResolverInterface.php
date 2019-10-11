@@ -32,11 +32,4 @@ interface ParameterResolverInterface
      * @return array
      */
     public function resolve(ReflectionFunctionAbstract $reflection, array $parameters = []): array;
-
-    /**
-     * Get the PSR container.
-     * 
-     * @return ContainerInterface
-     */
-    public function getContainer(): ContainerInterface;
 }

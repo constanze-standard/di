@@ -59,15 +59,15 @@ class ParameterResolver implements ParameterResolverInterface
         foreach ($reflection->getParameters() as $index => $parameter) {
             $paramName = $parameter->getName();
             switch (true) {
-                case in_array($paramName, array_keys($parameters)):
+                case in_array($paramName, array_keys($parameters), true):
                     $args[$index] = $parameters[$paramName];
                     break;
                 case $parameter->isDefaultValueAvailable():
                     $args[$index] = $parameter->getDefaultValue();
                     break;
                 case $parameter->hasType():
-                    $typeName = $parameter->getType();
-                    $args[$index] = $this->getInstanceByName($typeName);
+                    $reflectionType = $parameter->getType();
+                    $args[$index] = $this->getInstanceByName($reflectionType);
                     break;
                 default:
                     $numArgs[] = $index;
