@@ -18,15 +18,24 @@
 
 namespace ConstanzeStandard\DI\Interfaces;
 
-interface ResolverInterface
-{
+ interface ResolveableInterface
+ {
     /**
-     * Resolve the handler.
+     * Calling a function or callable object.
      * 
-     * @param mixed $source
+     * @param callable $callable
      * @param array $parameters
      * 
      * @return mixed
      */
-    public function resolve($source, array $parameters = []);
-}
+    public function resolve(array $parameters = []);
+
+    /**
+     * Resolve parameters.
+     * 
+     * @param array $parameters
+     * 
+     * @return array
+     */
+    public function resolveParameters(array $parameters = []): array;
+ }

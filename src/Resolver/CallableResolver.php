@@ -18,19 +18,19 @@
 
 namespace ConstanzeStandard\DI\Resolver;
 
-use ConstanzeStandard\DI\Interfaces\ConstructResolverInterface;
+use Closure;
 use ConstanzeStandard\DI\Interfaces\ParameterResolverInterface;
 use ConstanzeStandard\DI\Interfaces\ResolveableInterface;
-use ReflectionClass;
+use ReflectionMethod;
 
-class ConstructResolver implements ResolveableInterface
+class CallableResolver implements ResolveableInterface
 {
     /**
-     * The class name or instance.
+     * closure for object.
      * 
-     * @var string
+     * @var Closure
      */
-    private $class;
+    private $closure;
 
     /**
      * The parameter resolver.
@@ -40,28 +40,36 @@ class ConstructResolver implements ResolveableInterface
     private $parameterResolver;
 
     /**
-     * @param string $class
+     * @param callable $callable
      * @param ParameterResolverInterface $parameterResolver
      */
-    public function __construct(string $class, ParameterResolverInterface $parameterResolver)
+    public function __construct(callable $callable, ParameterResolverInterface $parameterResolver)
     {
-        $this->class = $class;
+        $this->closure = Closure::fromCallable($callable);
         $this->parameterResolver = $parameterResolver;
     }
 
     /**
-     * Resolve the handler and get the instant.
+     * Get closure from callable.
      * 
-     * @param string|object $class
+     * @return Closure
+     */
+    public function getClosure(): Closure
+    {
+        return $this->closure;
+    }
+
+    /**
+     * Resolve the callable object.
+     * 
      * @param array $parameters
      * 
-     * @return object
+     * @return mixed
      */
     public function resolve(array $parameters = [])
     {
         $args = $this->resolveParameters($parameters);
-        $class = $this->class;
-        return new $class(...$args);
+        return $this->getClosure()->__invoke(...$args);
     }
 
     /**
@@ -73,12 +81,7 @@ class ConstructResolver implements ResolveableInterface
      */
     public function resolveParameters(array $parameters = []): array
     {
-        $args = [];
-        $reflectionClass = new ReflectionClass($this->class);
-        $constructor = $reflectionClass->getConstructor();
-        if (! is_null($constructor)) {
-            $args = $this->parameterResolver->resolve($constructor, $parameters);
-        }
-        return $args;
+        $reflection = new ReflectionMethod($this->getClosure(), '__invoke');
+        return $this->parameterResolver->resolve($reflection, $parameters);
     }
 }

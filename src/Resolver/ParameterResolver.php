@@ -18,17 +18,20 @@
 
 namespace ConstanzeStandard\DI\Resolver;
 
+use ConstanzeStandard\Container\Container;
 use ConstanzeStandard\DI\Interfaces\ParameterResolverInterface;
+use InvalidArgumentException;
 use Psr\Container\ContainerInterface;
 use ReflectionFunctionAbstract;
 use ReflectionType;
+use TypeError;
 
 class ParameterResolver implements ParameterResolverInterface
 {
     /**
      * The PSR container.
      * 
-     * @var ContaienrInterface
+     * @var ContainerInterface
      */
     private $container;
 
@@ -44,22 +47,20 @@ class ParameterResolver implements ParameterResolverInterface
      * Resolve the handler and get parameters.
      * 
      * @param ReflectionFunctionAbstract $reflection
-     * @param array $providedParameters
-     * @param array $resolvedParameters
+     * @param array $parameters
      * 
      * @return array
      */
-    public function resolve(ReflectionFunctionAbstract $reflection, array $providedParameters = [])
+    public function resolve(ReflectionFunctionAbstract $reflection, array $parameters = []): array
     {
-        $reflectionParameters = $reflection->getParameters();
         $args = [];
-        
         $numArgs = [];
-        foreach ($reflectionParameters as $index => $parameter) {
+
+        foreach ($reflection->getParameters() as $index => $parameter) {
             $paramName = $parameter->getName();
             switch (true) {
-                case in_array($paramName, array_keys($providedParameters)):
-                    $args[$index] = $providedParameters[$paramName];
+                case in_array($paramName, array_keys($parameters)):
+                    $args[$index] = $parameters[$paramName];
                     break;
                 case $parameter->isDefaultValueAvailable():
                     $args[$index] = $parameter->getDefaultValue();
@@ -74,43 +75,17 @@ class ParameterResolver implements ParameterResolverInterface
             }
         }
 
-        $this->resolveMissMatchArges($numArgs, $args);
-
-        // TODO: invoke by args.
-    }
-
-    private function resolveMissMatchArges($numArgs, &$args)
-    {
-
-    }
-
-    /**
-     * Build arguments from reflectionParameters.
-     * assignment -> defaultValue -> type-hint
-     * 
-     * @param ReflectionParameter[] $reflectionParameters
-     * @param array $params
-     * 
-     * @return array
-     */
-    private function reflectionParametersToArgs(array $reflectionParameters, array $params)
-    {
-        $numArgs = [];
-        foreach ($reflectionParameters as $index => $parameter) {
-            $paramName = $parameter->getName();
-            if (is_numeric($index)) {
-
-            } elseif (in_array($paramName, array_keys($params))) {
-                $args[$index] = $params[$paramName];
-            } elseif ($parameter->isDefaultValueAvailable()) {
-                $args[$index] = $parameter->getDefaultValue();
-            } elseif ($parameter->hasType()) {
-                $args[$index] = $this->getInstanceByName($parameter->getType());
-            } else {
-                throw new \Exception('The parameter '. $paramName. 'has no specified type and and no assignment.');
+        $numParams = array_values(
+            array_filter($parameters, 'is_numeric', ARRAY_FILTER_USE_KEY)
+        );
+        if (count($numArgs) <= count($numParams)) {
+            foreach ($numArgs as $key => $numArg) {
+                $args[$numArg] = $numParams[$key];
             }
+            return $args;
         }
-        return $args;
+
+        throw new InvalidArgumentException('args number error.');
     }
 
     /**

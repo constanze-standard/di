@@ -18,6 +18,7 @@
 
 namespace ConstanzeStandard\DI\Interfaces;
 
+use Psr\Container\ContainerInterface;
 use ReflectionFunctionAbstract;
 
 interface ParameterResolverInterface
@@ -26,10 +27,16 @@ interface ParameterResolverInterface
      * Resolve the handler and get parameters.
      * 
      * @param ReflectionFunctionAbstract $reflection
-     * @param array $providedParameters
-     * @param array $resolvedParameters
+     * @param array $parameters
      * 
      * @return array
      */
-    public function resolve(ReflectionFunctionAbstract $reflection, array $providedParameters = [], array $resolvedParameters = []);
+    public function resolve(ReflectionFunctionAbstract $reflection, array $parameters = []): array;
+
+    /**
+     * Get the PSR container.
+     * 
+     * @return ContainerInterface
+     */
+    public function getContainer(): ContainerInterface;
 }
