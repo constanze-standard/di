@@ -1,13 +1,14 @@
 {
     "name": "constanze-standard/di",
-    "description": "A callable parser for dependency injection",
+    "description": "A PHP dependency injection manager",
     "keywords": [
         "invoker",
         "dependency",
         "di",
         "ioc",
         "reflection",
-        "container"
+        "container",
+        "annotation"
     ],
     "type": "library",
     "license": "Apache-2.0",
