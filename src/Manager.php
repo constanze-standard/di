@@ -19,6 +19,7 @@
 namespace ConstanzeStandard\DI;
 
 use ConstanzeStandard\DI\Interfaces\AnnotationResolverInterface;
+use ConstanzeStandard\DI\Interfaces\ManagerInterface;
 use ConstanzeStandard\DI\Interfaces\ParameterResolverInterface;
 use ConstanzeStandard\DI\Interfaces\ResolveableInterface;
 use ConstanzeStandard\DI\Resolver\AnnotationResolver;
@@ -27,7 +28,7 @@ use ConstanzeStandard\DI\Resolver\ConstructResolver;
 use ConstanzeStandard\DI\Resolver\ParameterResolver;
 use Psr\Container\ContainerInterface;
 
-class Manager
+class Manager implements ManagerInterface
 {
     /**
      * The PSR container.
