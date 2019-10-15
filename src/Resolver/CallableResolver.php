@@ -19,18 +19,27 @@
 namespace ConstanzeStandard\DI\Resolver;
 
 use Closure;
+use ConstanzeStandard\DI\Annotation\Params;
 use ConstanzeStandard\DI\Interfaces\ParameterResolverInterface;
 use ConstanzeStandard\DI\Interfaces\ResolveableInterface;
+use ReflectionFunction;
 use ReflectionMethod;
 
 class CallableResolver implements ResolveableInterface
 {
     /**
-     * closure for object.
+     * The instance of method, function is null.
      * 
-     * @var Closure
+     * @var object|null
      */
-    private $closure;
+    private $instance;
+
+    /**
+     * The reflection for callable.
+     * 
+     * @var ReflectionFunction|ReflectionMethod
+     */
+    private $reflection;
 
     /**
      * The parameter resolver.
@@ -45,18 +54,8 @@ class CallableResolver implements ResolveableInterface
      */
     public function __construct(callable $callable, ParameterResolverInterface $parameterResolver)
     {
-        $this->closure = Closure::fromCallable($callable);
+        [$this->instance, $this->reflection] = $this->getReflection($callable);
         $this->parameterResolver = $parameterResolver;
-    }
-
-    /**
-     * Get closure from callable.
-     * 
-     * @return Closure
-     */
-    public function getClosure(): Closure
-    {
-        return $this->closure;
     }
 
     /**
@@ -69,7 +68,10 @@ class CallableResolver implements ResolveableInterface
     public function resolve(array $parameters = [])
     {
         $args = $this->resolveParameters($parameters);
-        return $this->getClosure()->__invoke(...$args);
+        if ($this->instance) {
+            return $this->reflection->invokeArgs($this->instance, $args);
+        }
+        return $this->reflection->invokeArgs($args);
     }
 
     /**
@@ -81,7 +83,23 @@ class CallableResolver implements ResolveableInterface
      */
     public function resolveParameters(array $parameters = []): array
     {
-        $reflection = new ReflectionMethod($this->getClosure(), '__invoke');
-        return $this->parameterResolver->resolve($reflection, $parameters);
+        return $this->parameterResolver->resolve($this->reflection, $parameters);
+    }
+
+    /**
+     * Get reflection by callable object.
+     * 
+     * @param callable $callable
+     * 
+     * @return ReflectionFunction|ReflectionMethod
+     */
+    private function getReflection(callable $callable)
+    {
+        if (is_string($callable)) {
+            return [null , new ReflectionFunction($callable)];
+        } elseif (is_array($callable)) {
+            return [$callable[0], new ReflectionMethod($callable[0], $callable[1])];
+        }
+        return [$callable, new ReflectionMethod($callable, '__invoke')];
     }
 }

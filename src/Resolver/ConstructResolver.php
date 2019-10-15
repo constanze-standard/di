@@ -21,6 +21,7 @@ namespace ConstanzeStandard\DI\Resolver;
 use ConstanzeStandard\DI\Interfaces\ConstructResolverInterface;
 use ConstanzeStandard\DI\Interfaces\ParameterResolverInterface;
 use ConstanzeStandard\DI\Interfaces\ResolveableInterface;
+use Doctrine\Common\Annotations\SimpleAnnotationReader;
 use ReflectionClass;
 
 class ConstructResolver implements ResolveableInterface

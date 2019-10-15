@@ -16,26 +16,38 @@
  * limitations under the License.
  */
 
-namespace ConstanzeStandard\DI\Interfaces;
+namespace ConstanzeStandard\DI\Annotation;
 
-interface ResolveableInterface
+use Doctrine\Common\Annotations\Annotation;
+
+/**
+ * @Annotation
+ * @Target({"PROPERTY", "METHOD"})
+ */
+class Property
 {
-   /**
-    * Calling a function or callable object.
-    * 
-    * @param callable $callable
-    * @param array $parameters
-    * 
-    * @return mixed
-    */
-   public function resolve(array $parameters = []);
+    /**
+     * Entry name.
+     * 
+     * @var string
+     */
+    private $name;
 
-   /**
-    * Resolve parameters.
-    * 
-    * @param array $parameters
-    * 
-    * @return array
-    */
-   public function resolveParameters(array $parameters = []): array;
+    /**
+     * @param array $values
+     */
+    public function __construct(array $values)
+    {
+        $this->name = $values['value'];
+    }
+
+    /**
+     * Get the entry name.
+     * 
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
 }

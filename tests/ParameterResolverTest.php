@@ -1,6 +1,7 @@
 <?php
 
 use ConstanzeStandard\Container\Container;
+use ConstanzeStandard\DI\Interfaces\AnnotationResolverInterface;
 use ConstanzeStandard\DI\Manager;
 use ConstanzeStandard\DI\Resolver\ParameterResolver;
 use Psr\Container\ContainerInterface;
@@ -22,7 +23,9 @@ class ParameterResolverTest extends AbstractTest
     {
         /** @var ContainerInterface $container */
         $container = $this->createMock(ContainerInterface::class);
-        $parameterResolver = new ParameterResolver($container);
+        /** @var AnnotationResolverInterface $annotationResolver */
+        $annotationResolver = $this->createMock(AnnotationResolverInterface::class);
+        $parameterResolver = new ParameterResolver($container, $annotationResolver);
 
         $reflectionParameter1 = $this->createMock(ReflectionParameter::class);
         $reflectionParameter1->expects($this->once())->method('getName')->willReturn('a');
@@ -45,7 +48,9 @@ class ParameterResolverTest extends AbstractTest
     {
         /** @var ContainerInterface $container */
         $container = $this->createMock(ContainerInterface::class);
-        $parameterResolver = new ParameterResolver($container);
+        /** @var AnnotationResolverInterface $annotationResolver */
+        $annotationResolver = $this->createMock(AnnotationResolverInterface::class);
+        $parameterResolver = new ParameterResolver($container, $annotationResolver);
 
         $reflectionParameter2 = $this->createMock(ReflectionParameter::class);
         $reflectionParameter2->expects($this->once())->method('getName')->willReturn('b');
@@ -68,7 +73,9 @@ class ParameterResolverTest extends AbstractTest
     {
         /** @var ContainerInterface $container */
         $container = $this->createMock(ContainerInterface::class);
-        $parameterResolver = new ParameterResolver($container);
+        /** @var AnnotationResolverInterface $annotationResolver */
+        $annotationResolver = $this->createMock(AnnotationResolverInterface::class);
+        $parameterResolver = new ParameterResolver($container, $annotationResolver);
 
         $reflectionParameter2 = $this->createMock(ReflectionParameter::class);
         $reflectionParameter2->expects($this->once())->method('getName')->willReturn('b');

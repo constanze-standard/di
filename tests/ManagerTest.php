@@ -1,10 +1,25 @@
 <?php
 
+use ConstanzeStandard\DI\Interfaces\AnnotationResolverInterface;
+use ConstanzeStandard\DI\Interfaces\ParameterResolverInterface;
 use ConstanzeStandard\DI\Interfaces\ResolveableInterface;
 use ConstanzeStandard\DI\Manager;
+use ConstanzeStandard\DI\Resolver\CallableResolver;
 use Psr\Container\ContainerInterface;
 
 require_once __DIR__ . '/AbstractTest.php';
+
+function t1() {
+    return 1;
+}
+
+class TC2
+{
+    public function ts()
+    {
+        return 1;
+    }
+}
 
 class T { }
 
@@ -51,6 +66,24 @@ class ManagerTest extends AbstractTest
         $this->assertInstanceOf(ResolveableInterface::class, $result);
     }
 
+    public function testResolveWithStringCallable()
+    {
+        /** @var ParameterResolverInterface $parameterResolver */
+        $parameterResolver = $this->createMock(ParameterResolverInterface::class);
+        $callableResolver = new CallableResolver(t1::class, $parameterResolver);
+        $result = $callableResolver->resolve();
+        $this->assertEquals($result, 1);
+    }
+
+    public function testResolveWithArrayCallable()
+    {
+        /** @var ParameterResolverInterface $parameterResolver */
+        $parameterResolver = $this->createMock(ParameterResolverInterface::class);
+        $callableResolver = new CallableResolver([new TC2, 'ts'], $parameterResolver);
+        $result = $callableResolver->resolve();
+        $this->assertEquals($result, 1);
+    }
+
     public function testCall()
     {
         /** @var ContainerInterface $container */
@@ -78,5 +111,18 @@ class ManagerTest extends AbstractTest
         $this->assertEquals('bb', $result->b);
         $this->assertEquals(1, $result->a);
         $this->assertInstanceOf(T::class, $result->t);
+    }
+
+    public function testResolvePropertyAnnotation()
+    {
+        $instance = new \stdClass;
+        /** @var ContainerInterface $container */
+        $container = $this->createMock(ContainerInterface::class);
+        /** @var AnnotationResolverInterface $annotationResolver */
+        $annotationResolver = $this->createMock(AnnotationResolverInterface::class);
+        $annotationResolver->expects($this->once())->method('resolveProperty')->with($instance)->willReturn($instance);
+        $manager = new Manager($container, null, $annotationResolver);
+        $result = $manager->resolvePropertyAnnotation($instance);
+        $this->assertEquals($result, $instance);
     }
 }

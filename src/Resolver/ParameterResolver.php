@@ -19,10 +19,14 @@
 namespace ConstanzeStandard\DI\Resolver;
 
 use ConstanzeStandard\Container\Container;
+use ConstanzeStandard\DI\Annotation\Params;
+use ConstanzeStandard\DI\Interfaces\AnnotationResolverInterface;
 use ConstanzeStandard\DI\Interfaces\ParameterResolverInterface;
+use Doctrine\Common\Annotations\Reader;
 use InvalidArgumentException;
 use Psr\Container\ContainerInterface;
 use ReflectionFunctionAbstract;
+use ReflectionMethod;
 use ReflectionType;
 use TypeError;
 
@@ -36,11 +40,21 @@ class ParameterResolver implements ParameterResolverInterface
     private $container;
 
     /**
-     * @param ContainerInterface $container
+     * @var AnnotationResolverInterface
      */
-    public function __construct(ContainerInterface $container)
+    private $annotationResolver;
+
+    /**
+     * @param ContainerInterface $container
+     * @param Reader $reader
+     */
+    public function __construct(
+        ContainerInterface $container,
+        AnnotationResolverInterface $annotationResolver
+    )
     {
         $this->container = $container;
+        $this->annotationResolver = $annotationResolver;
     }
 
     /**
@@ -53,13 +67,20 @@ class ParameterResolver implements ParameterResolverInterface
      */
     public function resolve(ReflectionFunctionAbstract $reflection, array $parameters = []): array
     {
+        if ($reflection instanceof ReflectionMethod === true) {
+            $parameters = array_merge(
+                $this->annotationResolver->resolveMethodParameters($reflection),
+                $parameters
+            );
+        }
+
         $args = [];
         $numArgs = [];
 
         foreach ($reflection->getParameters() as $index => $parameter) {
             $paramName = $parameter->getName();
             switch (true) {
-                case in_array($paramName, array_keys($parameters), true):
+                case array_key_exists($paramName, $parameters):
                     $args[$index] = $parameters[$paramName];
                     break;
                 case $parameter->isDefaultValueAvailable():

@@ -18,21 +18,14 @@
 
 namespace ConstanzeStandard\DI;
 
-use ConstanzeStandard\Container\Container;
-use ConstanzeStandard\DI\Interfaces\CallableResolverInterface;
-use ConstanzeStandard\DI\Interfaces\ConstructResolverInterface;
-use ConstanzeStandard\DI\Interfaces\InvokerInterface;
+use ConstanzeStandard\DI\Interfaces\AnnotationResolverInterface;
 use ConstanzeStandard\DI\Interfaces\ParameterResolverInterface;
 use ConstanzeStandard\DI\Interfaces\ResolveableInterface;
+use ConstanzeStandard\DI\Resolver\AnnotationResolver;
 use ConstanzeStandard\DI\Resolver\CallableResolver;
 use ConstanzeStandard\DI\Resolver\ConstructResolver;
 use ConstanzeStandard\DI\Resolver\ParameterResolver;
-use InvalidArgumentException;
 use Psr\Container\ContainerInterface;
-use Reflection;
-use ReflectionFunction;
-use ReflectionMethod;
-use ReflectionObject;
 
 class Manager
 {
@@ -51,16 +44,26 @@ class Manager
     private $parameterResolver;
 
     /**
+     * @var AnnotationResolverInterface
+     */
+    private $annotationResolver;
+
+    /**
      * @param ContainerInterface $container
      * @param ParameterResolverInterface|null $parameterResolver
+     * @param AnnotationResolverInterface|null $annotationResolver
      */
     public function __construct(
         ContainerInterface $container,
-        ?ParameterResolverInterface $parameterResolver = null
+        ?ParameterResolverInterface $parameterResolver = null,
+        ?AnnotationResolverInterface $annotationResolver = null
     )
     {
         $this->container = $container;
-        $this->parameterResolver = $parameterResolver ?? new ParameterResolver($container);
+        $this->annotationResolver = $annotationResolver ?? new AnnotationResolver($container);
+        $this->parameterResolver = $parameterResolver ?? new ParameterResolver(
+            $container, $this->annotationResolver
+        );
     }
 
     /**
@@ -84,6 +87,16 @@ class Manager
     }
 
     /**
+     * Get the annotation resolver.
+     * 
+     * @return AnnotationResolverInterface
+     */
+    public function getAnnotationResolver(): AnnotationResolverInterface
+    {
+        return $this->annotationResolver;
+    }
+
+    /**
      * Calling a function or callable object.
      * 
      * @param callable $callable
@@ -104,6 +117,18 @@ class Manager
     public function instance(string $class, array $parameters = []): object
     {
         return $this->getConstructResolver($class)->resolve($parameters);
+    }
+
+    /**
+     * Resolve propertys by annotation.
+     * 
+     * @param object $instance
+     * 
+     * @return object
+     */
+    public function resolvePropertyAnnotation(object $instance)
+    {
+        return $this->getAnnotationResolver()->resolveProperty($instance);
     }
 
     /**
