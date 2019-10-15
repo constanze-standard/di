@@ -1,4 +1,8 @@
-# Constanze Standard: DI
+DI 是一个采用多种形式的 PHP 依赖注入管理组件，它与 PSR-11 标准的容器组件相配合，提供以下的几种功能：
 
-## PHP 依赖注入管理器
-A PHP dependency injection manager
+- 根据类型提示注入参数 (type-hint)
+- 通过注解 (Annotation) 的形式注入参数
+- 对类的属性进行参数注入
+- 通过多种形式向程序中注入自定义的参数
+- 获取参数列表
+
