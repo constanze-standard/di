@@ -10,4 +10,4 @@ DI 是一个 PHP 依赖注入管理组件，它与 PSR-11 标准配合，为你�
 ## 学习使用 DI
 请阅读以下章节了解 DI 的使用方法
 
-* [依赖注入的基本概念](https://github.com/constanze-standard/fluff/wiki/抽象概念)
+* [依赖注入的基本概念](https://constanze-standard.github.io/di/basic-concept)
