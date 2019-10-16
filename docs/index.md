@@ -7,7 +7,33 @@ DI 是一个 PHP 依赖注入管理组件，它与 PSR-11 标准配合，为你�
 - 通过多种形式向程序中注入自定义的参数
 - 获取参数列表
 
-## 学习使用 DI
-请阅读以下章节了解 DI 的使用方法
+## 基本示例
+通过 DI 管理器调用函数，并向函数中注入参数：
+```php
+<?php
 
-* [依赖注入的基本概念](https://constanze-standard.github.io/di/basic-concept)
+use ConstanzeStandard\Container\Container;
+use ConstanzeStandard\DI\Annotation\Params;
+use ConstanzeStandard\DI\Manager;
+
+require __DIR__ . '/../vendor/autoload.php';
+
+
+$injectionTest = new class() {
+
+    /** @Params(arg1 = "foo") */
+    public function __invoke($arg1)
+    {
+        echo $arg1;
+    }
+};
+
+$container = new Container();
+$container->add('foo', 'bar');
+
+$manager = new Manager($container);
+$manager->call($injectionTest);
+
+```
+
+## container 和 DI 的关系
