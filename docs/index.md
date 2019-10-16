@@ -33,7 +33,8 @@ $container->add('foo', 'bar');
 
 $manager = new Manager($container);
 $manager->call($injectionTest);
-
+// 输出： bar
 ```
+DI\Manager 可以直接调用一个可调用 (callable) 对象，这个过程中，你可以选择一种方式将参数注入到程序中。接下来我们将由浅入深介绍更多的使用技巧。
 
 ## container 和 DI 的关系
