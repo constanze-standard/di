@@ -133,3 +133,193 @@ Manager 在注入参数之前，按顺序做了以下几件事：
 ```
 
 ## 类的实例化与构造方法注入
+Manager 除了可以调用程序之外，也可以实例化一个对象，在实例化的同时，对构造方法进行参数注入。
+```php
+class Client
+{
+    /**
+     * @Params(foo = "foo")
+     */
+    public function __construct($foo)
+    {
+        $this->foo = $foo;
+    }
+}
+
+$container->add('foo', 'bar');
+
+$client = $manager->instance(Client::class);
+echo $client->foo;
+// 输出：bar
+```
+`instance` 方法与 call 方法的第一个参数是类的名称，第二个参数是向构造方法传递的自定义参数数组。
+
+通过 `instance` 方法对构造方法的参数注入与普通方法相同，但 instance 方法返回的是实例化后的对象实例。
+
+## 对类属性进行依赖注入
+我们可以通过注解 (Annotation) 对类的属性进行依赖注入。
+```php
+use ConstanzeStandard\DI\Annotation\Property;
+
+class Client
+{
+    /** @Property("foo") */
+    public $foo;
+}
+
+$container->add('foo', 'bar');
+
+$client = new Client();
+$manager->resolvePropertyAnnotation($client);
+
+echo $client->foo;
+// 输出：bar
+```
+通过 `Property` 注解，将类属性与一个容器的数据绑定，并在调用 `resolvePropertyAnnotation` 方法时将依赖项注入到属性中。
+
+# Resolver
+Manager 封装了比较常用的依赖注入操作，如果你还需要更加细化的功能，可以使用不同的 Resolver 进行控制。
+
+## 获取参数列表
+使用 `CallableResolver` 获取 Resolver 对象，然后你可以通过它获取可调用对象的参数列表：
+```php
+
+class serve { }
+
+$container->add(serve::class, new Serve());
+
+function resolver_test(Serve $serve, $foo) { }
+
+$resolver = $manager->getCallableResolver('resolver_test');
+$params = $resolver->resolveParameters(['foo' => 'bar']);
+
+print_r($params);
+/* 输出：
+Array
+(
+    [0] => serve Object
+        (
+        )
+
+    [1] => bar
+)
+*/
+```
+
+获取构造方法的参数列表与可调用对象相似，但你需要通过 `ConstructResolver` 进行操作：
+```php
+class Client
+{
+    public function __construct(serve $serve, $foo)
+    {
+        
+    }
+}
+
+$resolver = $manager->getConstructResolver(Client::class);
+$params = $resolver->resolveParameters(['foo' => 'bar']);
+
+print_r($params);
+/* 输出：
+Array
+(
+    [0] => serve Object
+        (
+        )
+
+    [1] => bar
+)
+*/
+```
+
+## AnnotationResolver
+`AnnotationResolver` 是针对注解形式的依赖注入进行控制的组件。
+`AnnotationResolver` 可以帮助你对类属性进行注入、获取在方法上注解的参数、对方法进行注解形式的依赖注入并调用。
+## 根据类属性获取 Property 对象：
+获取 Property 对象需要借助 PHP 的 Reflection 机制：
+```php
+use ConstanzeStandard\DI\Annotation\Property;
+
+class Client
+{
+    /** @Property("foo") */
+    public $property1;
+}
+
+$instance = new Client();
+$reflectionClass = new \ReflectionClass($instance);
+$reflectionProperty = $reflectionClass->getProperty('property1');
+
+$resolver = $manager->getAnnotationResolver();
+$property = $resolver->getProperty($reflectionProperty);
+
+$name = $property->getName();  // foo
+```
+
+## 类属性注入
+通过 Property 对类属性进行依赖注入，这与 Manager 相同（实际上 Manager 在内部调用了 Resolver）。
+```php
+$container->add('foo', 'bar');
+
+$resolver = $manager->getAnnotationResolver();
+$resolver->resolveProperty($instance);
+
+echo $instance->property1;  // 输出：bar
+```
+
+## 获取类类方法上注解的参数列表
+获取注解参数需要借助 PHP 的 Reflection 机制：
+```php
+use ConstanzeStandard\Container\Container;
+use ConstanzeStandard\DI\Annotation\Params;
+
+class Client
+{
+    /**
+     * @Params(
+     *  foo = "foo"
+     * )
+     */
+    public function test($foo, $abc = 1)
+    {
+
+    }
+}
+
+$container = new Container();
+$container->add('foo', 'bar');
+
+$instance = new Client();
+$reflectionMethod = new \ReflectionMethod($instance, 'test');
+
+$resolver = $manager->getAnnotationResolver();
+$parameters = $resolver->resolveMethodParameters($reflectionMethod);
+
+print_r($parameters);
+/* 输出：
+Array
+(
+    [foo] => bar
+)
+*/
+```
+需要注意的是，`resolveMethodParameters` 方法只获取注解的参数列表，其他参数将被忽略。
+
+## 自定义 Annotation Reader
+DI 集成了 `doctrine/annotations` 帮助 Resolver 解析注释，这个组件的消耗比较大，所以通常情况下，需要使用一种 Annotation 缓存来规避性能损耗。这时，你可以将自定义的 Annotation Reader 传入 Manager 构造方法的第三个参数中，以替换默认的 `\Doctrine\Common\Annotations\AnnotationReader`.
+```php
+use Doctrine\Common\Annotations\AnnotationReader;
+use Doctrine\Common\Annotations\CachedReader;
+use Doctrine\Common\Cache\PhpFileCache;
+
+$reader = new CachedReader(
+    new AnnotationReader(),
+    new PhpFileCache(__DIR__ . '/cache'),
+    $debug = true
+);
+$annotationResolver = new AnnotationResolver($container, $reader);
+
+$manager = new Manager($container, null, $annotationResolver);
+```
+
+这样就可以使用带有缓存功能的 `CachedReader` 以提升性能了。

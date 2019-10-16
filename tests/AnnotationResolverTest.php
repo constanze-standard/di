@@ -75,24 +75,24 @@ class AnnotationResolverTest extends AbstractTest
         $this->assertEquals($result, ['a' => 1]);
     }
 
-    public function testResolveMethod()
-    {
-        /** @var ContainerInterface $container */
-        $container = $this->createMock(ContainerInterface::class);
-        $container->expects($this->once())->method('get')->with('key2')->willReturn(1);
-        /** @var Params $params */
-        $params = $this->createMock(Params::class);
-        $params->expects($this->once())->method('getParams')->willReturn([
-            'a' => 'key2'
-        ]);
-        /** @var Reader $reader */
-        $reader = $this->createMock(Reader::class);
-        $reader->expects($this->once())->method('getMethodAnnotation')->willReturn($params);
+    // public function testResolveMethod()
+    // {
+    //     /** @var ContainerInterface $container */
+    //     $container = $this->createMock(ContainerInterface::class);
+    //     $container->expects($this->once())->method('get')->with('key2')->willReturn(1);
+    //     /** @var Params $params */
+    //     $params = $this->createMock(Params::class);
+    //     $params->expects($this->once())->method('getParams')->willReturn([
+    //         'a' => 'key2'
+    //     ]);
+    //     /** @var Reader $reader */
+    //     $reader = $this->createMock(Reader::class);
+    //     $reader->expects($this->once())->method('getMethodAnnotation')->willReturn($params);
 
-        $property_T = new Property_T();
-        $annotationResolver = new AnnotationResolver($container, $reader);
+    //     $property_T = new Property_T();
+    //     $annotationResolver = new AnnotationResolver($container, $reader);
 
-        $result = $annotationResolver->resolveMethod($property_T, 'method1_t');
-        $this->assertEquals($result, 1);
-    }
+    //     $result = $annotationResolver->resolveMethod($property_T, 'method1_t');
+    //     $this->assertEquals($result, 1);
+    // }
 }

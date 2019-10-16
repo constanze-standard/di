@@ -27,6 +27,7 @@ use Doctrine\Common\Annotations\Reader;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
 use ReflectionMethod;
+use ReflectionProperty;
 
 class AnnotationResolver implements AnnotationResolverInterface
 {
@@ -58,6 +59,21 @@ class AnnotationResolver implements AnnotationResolverInterface
     }
 
     /**
+     * Get the Property by ReflectionProperty
+     * 
+     * @param ReflectionProperty $reflectionProperty
+     * 
+     * @return Property|null
+     */
+    public function getProperty(ReflectionProperty $reflectionProperty)
+    {
+        return $this->reader->getPropertyAnnotation(
+            $reflectionProperty,
+            Property::class
+        );
+    }
+
+    /**
      * Resolve the property of object.
      * 
      * @param object $instance
@@ -69,10 +85,7 @@ class AnnotationResolver implements AnnotationResolverInterface
         $reflectionClass = new ReflectionClass($instance);
 
         foreach ($reflectionClass->getProperties() as $reflectionProperty) {
-            $property = $this->reader->getPropertyAnnotation(
-                $reflectionProperty,
-                Property::class
-            );
+            $property = $this->getProperty($reflectionProperty);
 
             if ($property instanceof Property) {
                 $entry = $this->container->get($property->getName());
@@ -101,21 +114,5 @@ class AnnotationResolver implements AnnotationResolverInterface
         }
 
         return $parameters;
-    }
-
-    /**
-     * Resolve the method.
-     * 
-     * @param object $instance
-     * @param string $method
-     * @param array $parameters
-     * 
-     * @return mixed
-     */
-    public function resolveMethod(object $instance, string $method, array $parameters = [])
-    {
-        $reflectionMethod = new ReflectionMethod($instance, $method);
-        $parameters = array_merge($this->resolveMethodParameters($reflectionMethod), $parameters);
-        return $reflectionMethod->invokeArgs($instance, $parameters);
     }
 }

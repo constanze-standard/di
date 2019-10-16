@@ -96,10 +96,13 @@ class ParameterResolver implements ParameterResolverInterface
             }
         }
 
-        $numParams = array_values(
-            array_filter($parameters, 'is_numeric', ARRAY_FILTER_USE_KEY)
-        );
-        if ($numArgs && (count($numArgs) <= count($numParams))) {
+        if (! $numArgs) {
+            return $args;
+        }
+
+        $numParams = array_values(array_filter($parameters, 'is_numeric', ARRAY_FILTER_USE_KEY));
+
+        if (count($numArgs) <= count($numParams)) {
             foreach ($numArgs as $key => $numArg) {
                 $args[$numArg] = $numParams[$key];
             }
