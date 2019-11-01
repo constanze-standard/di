@@ -31,7 +31,7 @@ class ParameterResolverTest extends AbstractTest
         $reflectionParameter1->expects($this->once())->method('getName')->willReturn('a');
         $reflectionParameter2 = $this->createMock(ReflectionParameter::class);
         $reflectionParameter2->expects($this->once())->method('getName')->willReturn('b');
-        $reflectionParameter2->expects($this->once())->method('isDefaultValueAvailable')->willReturn(false);
+        $reflectionParameter2->expects($this->once())->method('isOptional')->willReturn(false);
         $reflectionParameter2->expects($this->once())->method('hasType')->willReturn(false);
 
         /** @var ReflectionFunctionAbstract $reflection */
@@ -54,7 +54,7 @@ class ParameterResolverTest extends AbstractTest
 
         $reflectionParameter2 = $this->createMock(ReflectionParameter::class);
         $reflectionParameter2->expects($this->once())->method('getName')->willReturn('b');
-        $reflectionParameter2->expects($this->once())->method('isDefaultValueAvailable')->willReturn(false);
+        $reflectionParameter2->expects($this->once())->method('isOptional')->willReturn(false);
         $reflectionParameter2->expects($this->once())->method('hasType')->willReturn(false);
 
         /** @var ReflectionFunctionAbstract $reflection */
@@ -79,7 +79,7 @@ class ParameterResolverTest extends AbstractTest
 
         $reflectionParameter2 = $this->createMock(ReflectionParameter::class);
         $reflectionParameter2->expects($this->once())->method('getName')->willReturn('b');
-        $reflectionParameter2->expects($this->once())->method('isDefaultValueAvailable')->willReturn(false);
+        $reflectionParameter2->expects($this->once())->method('isOptional')->willReturn(false);
         $reflectionParameter2->expects($this->once())->method('hasType')->willReturn(false);
 
         /** @var ReflectionFunctionAbstract $reflection */

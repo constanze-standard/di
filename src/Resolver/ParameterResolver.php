@@ -83,8 +83,7 @@ class ParameterResolver implements ParameterResolverInterface
                 case array_key_exists($paramName, $parameters):
                     $args[$index] = $parameters[$paramName];
                     break;
-                case $parameter->isDefaultValueAvailable():
-                    $args[$index] = $parameter->getDefaultValue();
+                case $parameter->isOptional():
                     break;
                 case $parameter->hasType():
                     $reflectionType = $parameter->getType();

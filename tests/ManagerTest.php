@@ -25,7 +25,7 @@ class T { }
 
 class InstanceT
 {
-    public function __construct($a = 1, $b, T $t)
+    public function __construct($b, T $t, $a = 1)
     {
         $this->a = $a;
         $this->b = $b;
