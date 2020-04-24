@@ -18,8 +18,6 @@
 
 namespace ConstanzeStandard\DI\Resolver;
 
-use Closure;
-use ConstanzeStandard\DI\Annotation\Params;
 use ConstanzeStandard\DI\Interfaces\ParameterResolverInterface;
 use ConstanzeStandard\DI\Interfaces\ResolveableInterface;
 use ReflectionFunction;

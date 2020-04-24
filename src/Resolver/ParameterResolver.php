@@ -18,8 +18,6 @@
 
 namespace ConstanzeStandard\DI\Resolver;
 
-use ConstanzeStandard\Container\Container;
-use ConstanzeStandard\DI\Annotation\Params;
 use ConstanzeStandard\DI\Interfaces\AnnotationResolverInterface;
 use ConstanzeStandard\DI\Interfaces\ParameterResolverInterface;
 use Doctrine\Common\Annotations\Reader;
@@ -28,7 +26,6 @@ use Psr\Container\ContainerInterface;
 use ReflectionFunctionAbstract;
 use ReflectionMethod;
 use ReflectionType;
-use TypeError;
 
 class ParameterResolver implements ParameterResolverInterface
 {
@@ -123,7 +120,7 @@ class ParameterResolver implements ParameterResolverInterface
      */
     private function getInstanceByName(ReflectionType $reflectionType)
     {
-        $name = $reflectionType->getName();
+        $name = (string) $reflectionType;
         if ($this->container->has($name)) {
             return $this->container->get($name);
         }

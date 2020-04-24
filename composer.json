@@ -10,6 +10,9 @@
         "container",
         "annotation"
     ],
+    "scripts": {
+        "test": "phpunit tests"
+    },
     "type": "library",
     "license": "Apache-2.0",
     "minimum-stability": "stable",
@@ -17,11 +20,11 @@
     "authors": [
         {
             "name": "Constanze Standard",
-            "email": "omytty.alex@gmail.com"
+            "email": "omytty@126.com"
         }
     ],
     "require": {
-        "php": ">=7.4.0",
+        "php": ">=7.4",
         "psr/container": "^1.0",
         "doctrine/annotations": "^1.8"
     },
