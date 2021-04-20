@@ -1,20 +1,15 @@
 <?php
 
-use ConstanzeStandard\Container\Container;
 use ConstanzeStandard\DI\Interfaces\AnnotationResolverInterface;
 use ConstanzeStandard\DI\Manager;
 use ConstanzeStandard\DI\Resolver\ParameterResolver;
+use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Container\ContainerInterface;
 
 require_once __DIR__ . '/AbstractTest.php';
 
 class T2
 {
-}
-
-class T3
-{
-    public function t33(T2 $t2) {}
 }
 
 class ParameterResolverTest extends AbstractTest
@@ -34,7 +29,7 @@ class ParameterResolverTest extends AbstractTest
         $reflectionParameter2->expects($this->once())->method('isOptional')->willReturn(false);
         $reflectionParameter2->expects($this->once())->method('hasType')->willReturn(false);
 
-        /** @var ReflectionFunctionAbstract $reflection */
+        /** @var MockObject|ReflectionFunctionAbstract $reflection */
         $reflection = $this->createMock(ReflectionFunctionAbstract::class);
         $reflection->expects($this->once())->method('getParameters')->willReturn([
             $reflectionParameter1,
@@ -46,60 +41,53 @@ class ParameterResolverTest extends AbstractTest
 
     public function testResolveWithNumberIndexWithoutOtherParameters()
     {
-        /** @var ContainerInterface $container */
-        $container = $this->createMock(ContainerInterface::class);
-        /** @var AnnotationResolverInterface $annotationResolver */
-        $annotationResolver = $this->createMock(AnnotationResolverInterface::class);
-        $parameterResolver = new ParameterResolver($container, $annotationResolver);
-
-        $reflectionParameter2 = $this->createMock(ReflectionParameter::class);
-        $reflectionParameter2->expects($this->once())->method('getName')->willReturn('b');
-        $reflectionParameter2->expects($this->once())->method('isOptional')->willReturn(false);
-        $reflectionParameter2->expects($this->once())->method('hasType')->willReturn(false);
-
-        /** @var ReflectionFunctionAbstract $reflection */
-        $reflection = $this->createMock(ReflectionFunctionAbstract::class);
-        $reflection->expects($this->once())->method('getParameters')->willReturn([
-            $reflectionParameter2
-        ]);
+        $parameterResolver = $this->createParameterResolver();
+        $reflection = $this->createReflectionWithNameB();
         $result = $parameterResolver->resolve($reflection, ['a' => 1, 2, 3]);
         $this->assertEquals([2], $result);
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testResolveWithNumberIndexWithException()
     {
-        /** @var ContainerInterface $container */
-        $container = $this->createMock(ContainerInterface::class);
-        /** @var AnnotationResolverInterface $annotationResolver */
-        $annotationResolver = $this->createMock(AnnotationResolverInterface::class);
-        $parameterResolver = new ParameterResolver($container, $annotationResolver);
-
-        $reflectionParameter2 = $this->createMock(ReflectionParameter::class);
-        $reflectionParameter2->expects($this->once())->method('getName')->willReturn('b');
-        $reflectionParameter2->expects($this->once())->method('isOptional')->willReturn(false);
-        $reflectionParameter2->expects($this->once())->method('hasType')->willReturn(false);
-
-        /** @var ReflectionFunctionAbstract $reflection */
-        $reflection = $this->createMock(ReflectionFunctionAbstract::class);
-        $reflection->expects($this->once())->method('getParameters')->willReturn([
-            $reflectionParameter2
-        ]);
-        $result = $parameterResolver->resolve($reflection, ['a' => 1]);
+        $this->expectException(InvalidArgumentException::class);
+        $parameterResolver = $this->createParameterResolver();
+        $reflection = $this->createReflectionWithNameB();
+        $parameterResolver->resolve($reflection, ['a' => 1]);
     }
 
-    /**
-     * @expectedException \Exception
-     */
     public function testResolveWithNumberIndexWithTypeWithException()
     {
-        $container = new Container();
+        $this->expectException(Exception::class);
+        $container = $this->createMock(ContainerInterface::class);
         $manager = new Manager($container);
 
         $manager->call(function(T2 $t2) {
             return $t2;
         });
+    }
+
+    private function createParameterResolver(): ParameterResolver
+    {
+        /** @var MockObject|ContainerInterface $container */
+        $container = $this->createMock(ContainerInterface::class);
+        /** @var AnnotationResolverInterface $annotationResolver */
+        $annotationResolver = $this->createMock(AnnotationResolverInterface::class);
+        return new ParameterResolver($container, $annotationResolver);
+    }
+
+    private function createReflectionWithNameB(): MockObject|ReflectionFunctionAbstract
+    {
+        /** @var MockObject|ReflectionParameter $reflectionParameter2 */
+        $reflectionParameter2 = $this->createMock(ReflectionParameter::class);
+        $reflectionParameter2->expects($this->once())->method('getName')->willReturn('b');
+        $reflectionParameter2->expects($this->once())->method('isOptional')->willReturn(false);
+        $reflectionParameter2->expects($this->once())->method('hasType')->willReturn(false);
+
+        /** @var MockObject|ReflectionFunctionAbstract $reflection */
+        $reflection = $this->createMock(ReflectionFunctionAbstract::class);
+        $reflection->expects($this->once())->method('getParameters')->willReturn([
+            $reflectionParameter2
+        ]);
+        return $reflection;
     }
 }

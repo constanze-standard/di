@@ -18,7 +18,6 @@
 
 namespace ConstanzeStandard\DI\Interfaces;
 
-use Psr\Container\ContainerInterface;
 use ReflectionFunctionAbstract;
 
 interface ParameterResolverInterface

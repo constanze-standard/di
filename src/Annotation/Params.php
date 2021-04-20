@@ -31,10 +31,10 @@ class Params
      * 
      * @var array
      */
-    private $params;
+    private array $params;
 
     /**
-     * @param array $values
+     * @param array $params
      */
     public function __construct(array $params = [])
     {
@@ -46,7 +46,7 @@ class Params
      * 
      * @return array
      */
-    public function getParams()
+    public function getParams(): array
     {
         return $this->params;
     }

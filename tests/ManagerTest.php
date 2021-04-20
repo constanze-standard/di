@@ -5,17 +5,23 @@ use ConstanzeStandard\DI\Interfaces\ParameterResolverInterface;
 use ConstanzeStandard\DI\Interfaces\ResolveableInterface;
 use ConstanzeStandard\DI\Manager;
 use ConstanzeStandard\DI\Resolver\CallableResolver;
+use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Container\ContainerInterface;
 
 require_once __DIR__ . '/AbstractTest.php';
 
-function t1() {
+/**
+ * @return int
+ * @noinspection PhpUnused
+ */
+function t1(): int
+{
     return 1;
 }
 
 class TC2
 {
-    public function ts()
+    public function ts(): int
     {
         return 1;
     }
@@ -70,9 +76,9 @@ class ManagerTest extends AbstractTest
     {
         /** @var ParameterResolverInterface $parameterResolver */
         $parameterResolver = $this->createMock(ParameterResolverInterface::class);
-        $callableResolver = new CallableResolver(t1::class, $parameterResolver);
+        $callableResolver = new CallableResolver('t1', $parameterResolver);
         $result = $callableResolver->resolve();
-        $this->assertEquals($result, 1);
+        $this->assertEquals(1, $result);
     }
 
     public function testResolveWithArrayCallable()
@@ -81,7 +87,7 @@ class ManagerTest extends AbstractTest
         $parameterResolver = $this->createMock(ParameterResolverInterface::class);
         $callableResolver = new CallableResolver([new TC2, 'ts'], $parameterResolver);
         $result = $callableResolver->resolve();
-        $this->assertEquals($result, 1);
+        $this->assertEquals(1, $result);
     }
 
     public function testCall()
@@ -100,7 +106,7 @@ class ManagerTest extends AbstractTest
     public function testInstance()
     {
         $t = new T;
-        /** @var ContainerInterface $container */
+        /** @var MockObject|ContainerInterface $container */
         $container = $this->createMock(ContainerInterface::class);
         $container->expects($this->once())->method('get')->with(T::class)->willReturn($t);
         $container->expects($this->once())->method('has')->with(T::class)->willReturn(true);
@@ -115,10 +121,10 @@ class ManagerTest extends AbstractTest
 
     public function testResolvePropertyAnnotation()
     {
-        $instance = new \stdClass;
-        /** @var ContainerInterface $container */
+        $instance = new stdClass;
+        /** @var MockObject|ContainerInterface $container */
         $container = $this->createMock(ContainerInterface::class);
-        /** @var AnnotationResolverInterface $annotationResolver */
+        /** @var MockObject|AnnotationResolverInterface $annotationResolver */
         $annotationResolver = $this->createMock(AnnotationResolverInterface::class);
         $annotationResolver->expects($this->once())->method('resolveProperty')->with($instance)->willReturn($instance);
         $manager = new Manager($container, null, $annotationResolver);
